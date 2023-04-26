@@ -18,6 +18,13 @@ using ExcelDataReader;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using MessageBox = System.Windows.Forms.MessageBox;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using Clipboard = System.Windows.Clipboard;
+using DataFormats = System.Windows.DataFormats;
+using System.Reflection;
+using DataGrid = System.Windows.Controls.DataGrid;
 
 namespace Diplom.Pages
 {
@@ -73,7 +80,6 @@ namespace Diplom.Pages
             };
             DataSet dataSet = edr.AsDataSet(conf);
             DataView dtView = dataSet.Tables[0].AsDataView();
-
             edr.Close();
             return dtView;
         }
@@ -86,6 +92,8 @@ namespace Diplom.Pages
                 con.Open();
                 if (con != null && con.State == ConnectionState.Open)
                 {
+                    MessageBox.Show("Успешно подключено");
+                    //CheckTables(sender,e);
                     SqlDataAdapter sda = new SqlDataAdapter("CREATE DATABASE USER ", con);
                     con.Close();
                 }
@@ -94,7 +102,6 @@ namespace Diplom.Pages
                     MessageBox.Show("Неудалось подключиться к серверу");
                     return;
                 }
-                NavigationService.Navigate(new PGSql());
             }
             else
             {
@@ -129,6 +136,23 @@ namespace Diplom.Pages
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show(ex.Message.ToString());
+            }
+        }
+        private void CheckTables(object sender, RoutedEventArgs e)
+        {
+            DataRowView dataRow = (DataRowView)dtgView.SelectedItem;
+            List<DataGrid> tab = new List<DataGrid>();
+            int index = dtgView.CurrentCell.Column.DisplayIndex;
+            List<DataGrid> cellValue = new List<DataGrid>((int)dataRow.Row.ItemArray[index]);
+            for (int i = 0; i < dtgView.Columns.Count; i++)
+            {
+                for (int j = 0; j < cellValue.Count; j++)
+                {
+                    if (cellValue[j] == cellValue[j + 1])
+                    {
+                        tab = cellValue;
+                    }
+                }
             }
         }
     }

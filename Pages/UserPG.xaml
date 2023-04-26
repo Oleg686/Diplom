@@ -18,7 +18,8 @@
             <Label Content="Поиск:" Height= "{Binding ElementName=wpTop,Path=ActualHeight}"/>
             <TextBox Name="txbSearch" Width="200"/>
             <Label Content="Фильтр:"/>
-            <TextBox Name="txtFill" Width="200"/>
+            <ComboBox Name="txtFill" Width="200">
+            </ComboBox>
         </WrapPanel>
         <WrapPanel Name="wpBot" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Center">
             <Button Name="btnFile" Content="Выбрать файл" Click="btnFile_Click"/>
@@ -26,7 +27,6 @@
             <Button Name="btnjSON" Content="Сформировать jSON" Click="btnjSON_Click"/>
         </WrapPanel>
         <TextBox Name="txbFile" Grid.Row="1"/>
-        <DataGrid Name="dtgView" Grid.Row="1">
-        </DataGrid>
+        <DataGrid Name="dtgView" Grid.Row="1"/>
     </Grid>
 </Page>
