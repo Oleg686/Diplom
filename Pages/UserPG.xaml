@@ -14,12 +14,8 @@
             <RowDefinition Height="80*"/>
             <RowDefinition Height="10*"/>
         </Grid.RowDefinitions>
-        <WrapPanel Name="wpTop" Grid.Row="0">
-            <Label Content="Поиск:" Height= "{Binding ElementName=wpTop,Path=ActualHeight}"/>
-            <TextBox Name="txbSearch" Width="200"/>
-            <Label Content="Фильтр:"/>
-            <ComboBox Name="txtFill" Width="200">
-            </ComboBox>
+        <WrapPanel Name="wpTop" Grid.Row="0" HorizontalAlignment="Center">
+            <Label Content="Возврат сбойных платежей" FontFamily="Comic con" FontSize="24" Height= "{Binding ElementName=wpTop,Path=ActualHeight}"/>
         </WrapPanel>
         <WrapPanel Name="wpBot" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Center">
             <Button Name="btnFile" Content="Выбрать файл" Click="btnFile_Click"/>

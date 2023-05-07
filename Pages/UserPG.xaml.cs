@@ -25,6 +25,11 @@ using Clipboard = System.Windows.Clipboard;
 using DataFormats = System.Windows.DataFormats;
 using System.Reflection;
 using DataGrid = System.Windows.Controls.DataGrid;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Xml.Linq;
+using System.Windows.Markup;
+using System.Runtime.Remoting.Contexts;
 
 namespace Diplom.Pages
 {
@@ -39,7 +44,6 @@ namespace Diplom.Pages
         {
             InitializeComponent();
         }
-
         private void btnFile_Click(object sender, RoutedEventArgs e)
         {
             // Открытие файла в проводнике с расширением EXCEL
@@ -61,7 +65,7 @@ namespace Diplom.Pages
                 MessageBox.Show(ex.Message.ToString());
             }
         }
-        private DataView readFile(string fileNames)
+        public DataView readFile(string fileNames)
         {
             //Вывод EXCEL файла в datagrid
             var extension = fileNames.Substring(fileNames.LastIndexOf('.'));
@@ -94,7 +98,28 @@ namespace Diplom.Pages
                 {
                     MessageBox.Show("Успешно подключено");
                     //CheckTables(sender,e);
-                    SqlDataAdapter sda = new SqlDataAdapter("CREATE DATABASE USER ", con);
+                    string readString = "Create Database TestOL";
+                    string Read = "Use [TestOL] CREATE TABLE Oleg(\r\n  ID INT  PRIMARY KEY,\r\n  Name VARCHAR(20) NOT NULL,\r\n  Surname INT DEFAULT 0\r\n);";
+                    SqlCommand sqlCommand = new SqlCommand(Read, con);
+                    SqlCommand readCommand = new SqlCommand(readString, con);
+                    using (SqlDataReader dataRead = readCommand.ExecuteReader())
+                    {
+
+                    }
+                    using (SqlDataReader Datard = sqlCommand.ExecuteReader())
+                    {
+                        if (Datard != null)
+                        {
+                            while (Datard.Read())
+                            {
+                                this.dtgView.SelectAllCells();
+                                this.dtgView.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
+                                ApplicationCommands.Copy.Execute(null, this.dtgView);
+                                this.dtgView.UnselectAllCells();
+                                var result = (TextWriter)Clipboard.GetData(DataFormats.CommaSeparatedValue);
+                            }
+                        }
+                    }
                     con.Close();
                 }
                 else
@@ -109,33 +134,45 @@ namespace Diplom.Pages
             }
         }
 
+        private static void insertToDataBase(TextWriter result)
+        {
+            throw new NotImplementedException();
+        }
+
         private void btnjSON_Click(object sender, RoutedEventArgs e)
         {
-            this.dtgView.SelectAllCells();
-            this.dtgView.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
-            ApplicationCommands.Copy.Execute(null, this.dtgView);
-            this.dtgView.UnselectAllCells();
-            String result = (string)Clipboard.GetData(DataFormats.CommaSeparatedValue);
-
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "jSON file";
-            dlg.DefaultExt = ".json";
-            dlg.Filter = "jSON files (.json)|*.json";
-
-            Nullable<bool> _result = dlg.ShowDialog();
-
-            string filePath = "";
-            if (_result == true) filePath = dlg.FileName;
-
-            try
+            if (dtgView.ItemsSource != null)
             {
-                StreamWriter sw = new StreamWriter(filePath);
-                sw.WriteLine(result);
-                sw.Close();
+                this.dtgView.SelectAllCells();
+                this.dtgView.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
+                ApplicationCommands.Copy.Execute(null, this.dtgView);
+                this.dtgView.UnselectAllCells();
+                var result = (TextWriter)Clipboard.GetData(DataFormats.CommaSeparatedValue);
+
+                Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+                dlg.FileName = "jSON file";
+                dlg.DefaultExt = ".json";
+                dlg.Filter = "jSON files (.json)|*.json";
+
+                Nullable<bool> _result = dlg.ShowDialog();
+
+                string filePath = "";
+                if (_result == true) filePath = dlg.FileName;
+
+                try
+                {
+                    StreamWriter sw = new StreamWriter(filePath);
+                    sw.WriteLine(result);
+                    sw.Close();
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show(ex.Message.ToString());
+                }
             }
-            catch (Exception ex)
+            else
             {
-                System.Windows.MessageBox.Show(ex.Message.ToString());
+                MessageBox.Show("Нету данных для создания файла");
             }
         }
         private void CheckTables(object sender, RoutedEventArgs e)
