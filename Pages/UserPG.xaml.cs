@@ -127,7 +127,7 @@ namespace Diplom.Pages
                     }
                     using (SqlDataReader Pidr = sqlbug.ExecuteReader())
                     {
-                        MessageBox.Show("ХУЙ");
+                        MessageBox.Show("Ошибок нету");
                     }
                     using (SqlDataReader Opa = insCommand.ExecuteReader())
                     {
