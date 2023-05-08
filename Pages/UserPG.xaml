@@ -14,13 +14,13 @@
             <RowDefinition Height="80*"/>
             <RowDefinition Height="10*"/>
         </Grid.RowDefinitions>
-        <WrapPanel Name="wpTop" Grid.Row="0" HorizontalAlignment="Center">
-            <Label Content="Возврат сбойных платежей" FontFamily="Comic con" FontSize="24" Height= "{Binding ElementName=wpTop,Path=ActualHeight}"/>
-        </WrapPanel>
+        <Label Name="LiveTimeLabel" Content="%TIME%" HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="0" FontSize="20" FontWeight="Bold" Foreground="Red" />
+        <Label Name="LBTime" Content="%TIME%" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" FontSize="20" FontWeight="Bold" Foreground="Red"/>
+        <Label Content="Возврат сбойных платежей" FontFamily="Comic Sans MS" FontSize="48" Height= "{Binding ElementName=wpTop,Path=ActualHeight}"/>
         <WrapPanel Name="wpBot" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Button Name="btnFile" Content="Выбрать файл" Click="btnFile_Click"/>
-            <Button Name="btnSql" Content="Создать базу данных" Click="btnSql_Click"/>
-            <Button Name="btnjSON" Content="Сформировать jSON" Click="btnjSON_Click"/>
+            <Button Name="btnFile" Content="Выбрать файл" FontSize="24" Click="btnFile_Click"/>
+            <Button Name="btnSql" Content="Создать базу данных" FontSize="24" Click="btnSql_Click"/>
+            <Button Name="btnjSON" Content="Сформировать jSON" FontSize="24" Click="btnjSON_Click"/>
         </WrapPanel>
         <TextBox Name="txbFile" Grid.Row="1"/>
         <DataGrid Name="dtgView" Grid.Row="1"/>

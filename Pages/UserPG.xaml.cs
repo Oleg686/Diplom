@@ -30,6 +30,8 @@ using Newtonsoft.Json.Linq;
 using System.Xml.Linq;
 using System.Windows.Markup;
 using System.Runtime.Remoting.Contexts;
+using System.Data.OleDb;
+using System.Windows.Threading;
 
 namespace Diplom.Pages
 {
@@ -40,9 +42,22 @@ namespace Diplom.Pages
     {
         private DataTableCollection tableCollection = null;
         IExcelDataReader edr;
+        string ds;
+        string temp;
+        public SqlConnection con = new SqlConnection("Data Source=DESK_HP_MINI\\SQLEXPRESS;Integrated Security=true;");
+        OpenFileDialog OpenD = new OpenFileDialog();
+        void timer_Tick(object sender, EventArgs e)
+        {
+            LiveTimeLabel.Content = DateTime.Now.ToString("D");
+            LBTime.Content = DateTime.Now.ToString("F");
+        }
         public UserPG()
         {
             InitializeComponent();
+            DispatcherTimer LiveTime = new DispatcherTimer();
+            LiveTime.Interval = TimeSpan.FromSeconds(1);
+            LiveTime.Tick += timer_Tick;
+            LiveTime.Start();
         }
         private void btnFile_Click(object sender, RoutedEventArgs e)
         {
@@ -50,6 +65,7 @@ namespace Diplom.Pages
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Excel file (*.xlxs)|*.xlsx|All Files(*.*)|*.*";
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            OpenD = openFileDialog;
             if (openFileDialog.ShowDialog() == true)
             {
                 txbFile.Text = File.ReadAllText(openFileDialog.FileName);
@@ -58,13 +74,13 @@ namespace Diplom.Pages
             try
             {
                 dtgView.ItemsSource = readFile(openFileDialog.FileName);
-
+            
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message.ToString());
             }
-        }
+        }     
         public DataView readFile(string fileNames)
         {
             //Вывод EXCEL файла в datagrid
@@ -90,55 +106,47 @@ namespace Diplom.Pages
 
         private void btnSql_Click(object sender, RoutedEventArgs e)
         {
+            temp = LiveTimeLabel.Content.ToString();
+            ds = LBTime.Content.ToString();
             if (dtgView.ItemsSource != null)
             {
-                SqlConnection con = new SqlConnection("Data Source=DESK_HP_MINI\\SQLEXPRESS01;Integrated Security=true;");
                 con.Open();
                 if (con != null && con.State == ConnectionState.Open)
                 {
                     MessageBox.Show("Успешно подключено");
                     //CheckTables(sender,e);
-                    string readString = "Create Database TestOL";
-                    string Read = "Use [TestOL] CREATE TABLE Oleg(\r\n  ID INT  PRIMARY KEY,\r\n  Name VARCHAR(20) NOT NULL,\r\n  Surname INT DEFAULT 0\r\n);";
-                    SqlCommand sqlCommand = new SqlCommand(Read, con);
+                    string readString = "Create Database ["+ temp +"]";
+                    string Insert = "Use [" + temp + "] SELECT INFO [" + ds + "] FROM OPENROWSET('Microsoft.ACE.OLEDB.12.0','Excel 12.0; Database=[" + OpenD + "]', [Sheet1$]); ";
+                    SqlCommand insCommand = new SqlCommand(Insert, con);
+                    string Bug = "EXEC sp_MSset_oledb_prop N'Microsoft.ACE.OLEDB.12.0', N'DynamicParameters', 1; EXEC sp_configure 'show advanced option', 1\r\nRECONFIGURE WITH OVERRIDE\r\nEXEC sp_configure 'Ad Hoc Distributed Queries', 1\r\nRECONFIGURE WITH OVERRIDE\r\nEXEC sp_configure 'show advanced option', 1\r\nRECONFIGURE WITH OVERRIDE\r\n";
+                    SqlCommand sqlbug = new SqlCommand(Bug, con);
                     SqlCommand readCommand = new SqlCommand(readString, con);
                     using (SqlDataReader dataRead = readCommand.ExecuteReader())
                     {
-
+                        MessageBox.Show("База успешно создана");
                     }
-                    using (SqlDataReader Datard = sqlCommand.ExecuteReader())
+                    using (SqlDataReader Pidr = sqlbug.ExecuteReader())
                     {
-                        if (Datard != null)
-                        {
-                            while (Datard.Read())
-                            {
-                                this.dtgView.SelectAllCells();
-                                this.dtgView.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
-                                ApplicationCommands.Copy.Execute(null, this.dtgView);
-                                this.dtgView.UnselectAllCells();
-                                var result = (TextWriter)Clipboard.GetData(DataFormats.CommaSeparatedValue);
-                            }
-                        }
+                        MessageBox.Show("ХУЙ");
+                    }
+                    using (SqlDataReader Opa = insCommand.ExecuteReader())
+                    {
+                        MessageBox.Show("Данные успешно добавлены");
                     }
                     con.Close();
                 }
-                else
-                {
-                    MessageBox.Show("Неудалось подключиться к серверу");
-                    return;
-                }
+            else
+            {
+                MessageBox.Show("Неудалось подключиться к серверу");
+                return;
+            }
             }
             else
             {
-                MessageBox.Show("Нету данных для создания базы");
+                MessageBox.Show("Нету данных");
+                return;
             }
         }
-
-        private static void insertToDataBase(TextWriter result)
-        {
-            throw new NotImplementedException();
-        }
-
         private void btnjSON_Click(object sender, RoutedEventArgs e)
         {
             if (dtgView.ItemsSource != null)
