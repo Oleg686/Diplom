@@ -32,6 +32,8 @@ using System.Windows.Markup;
 using System.Runtime.Remoting.Contexts;
 using System.Data.OleDb;
 using System.Windows.Threading;
+using System.Web.Script.Serialization;
+using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
 
 namespace Diplom.Pages
 {
@@ -150,23 +152,28 @@ namespace Diplom.Pages
                 this.dtgView.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
                 ApplicationCommands.Copy.Execute(null, this.dtgView);
                 this.dtgView.UnselectAllCells();
-                var result = (TextWriter)Clipboard.GetData(DataFormats.CommaSeparatedValue);
-
+                var result = (string)Clipboard.GetData(DataFormats.CommaSeparatedValue);
                 Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
                 dlg.FileName = "jSON file";
                 dlg.DefaultExt = ".json";
                 dlg.Filter = "jSON files (.json)|*.json";
-
+                var json = new JavaScriptSerializer().Serialize(result);
                 Nullable<bool> _result = dlg.ShowDialog();
-
+                
                 string filePath = "";
                 if (_result == true) filePath = dlg.FileName;
-
+                
                 try
                 {
-                    StreamWriter sw = new StreamWriter(filePath);
-                    sw.WriteLine(result);
-                    sw.Close();
+                    SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+                    saveFileDialog1.ShowDialog();
+                    if (saveFileDialog1.FileName != "")
+                    {
+                        File.WriteAllText(saveFileDialog1.FileName, json);
+                    }
+                    //StreamWriter sw = new StreamWriter(filePath);
+                    //sw.Write(json);
+                    //sw.Close();
                 }
                 catch (Exception ex)
                 {
