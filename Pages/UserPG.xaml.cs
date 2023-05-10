@@ -118,21 +118,16 @@ namespace Diplom.Pages
                     string readString = "Create Database ["+ temp +"]";
                     string Insert = "Use [" + temp + "] SELECT INFO [" + ds + "] FROM OPENROWSET('Microsoft.ACE.OLEDB.12.0','Excel 12.0; Database=[" + OpenD + "]', [Sheet1$]); ";
                     SqlCommand insCommand = new SqlCommand(Insert, con);
-                    string Bug = "EXEC sp_MSset_oledb_prop N'Microsoft.ACE.OLEDB.12.0', N'DynamicParameters', 1; EXEC sp_configure 'show advanced option', 1\r\nRECONFIGURE WITH OVERRIDE\r\nEXEC sp_configure 'Ad Hoc Distributed Queries', 1\r\nRECONFIGURE WITH OVERRIDE\r\nEXEC sp_configure 'show advanced option', 1\r\nRECONFIGURE WITH OVERRIDE\r\n";
-                    SqlCommand sqlbug = new SqlCommand(Bug, con);
                     SqlCommand readCommand = new SqlCommand(readString, con);
                     using (SqlDataReader dataRead = readCommand.ExecuteReader())
                     {
                         MessageBox.Show("База успешно создана");
                     }
-                    using (SqlDataReader Pidr = sqlbug.ExecuteReader())
-                    {
-                        MessageBox.Show("Ошибок нету");
-                    }
-                    using (SqlDataReader Opa = insCommand.ExecuteReader())
+                    using (SqlDataReader insdata = insCommand.ExecuteReader())
                     {
                         MessageBox.Show("Данные успешно добавлены");
                     }
+
                     con.Close();
                 }
             else
