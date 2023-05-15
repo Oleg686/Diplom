@@ -41,7 +41,6 @@ namespace Diplom.Pages
     /// </summary>
     public partial class UserPG : Page
     {
-        private DataTableCollection tableCollection = null;
         IExcelDataReader edr;
         string ds;
         string temp;
