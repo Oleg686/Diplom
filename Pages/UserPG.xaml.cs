@@ -46,6 +46,7 @@ namespace Diplom.Pages
         string temp;
         public SqlConnection con = new SqlConnection("Data Source=DESK_HP_MINI\\SQLEXPRESS;Integrated Security=true;");
         OpenFileDialog OpenD = new OpenFileDialog();
+        int count_col;
         void timer_Tick(object sender, EventArgs e)
         {
             LiveTimeLabel.Content = DateTime.Now.ToString("D");
@@ -87,9 +88,9 @@ namespace Diplom.Pages
             var extension = fileNames.Substring(fileNames.LastIndexOf('.'));
             FileStream stream = File.Open(fileNames, FileMode.Open, FileAccess.Read);
             if (extension == ".xlsx")
-                edr = ExcelReaderFactory.CreateOpenXmlReader(stream);
+                edr = ExcelReaderFactory.CreateReader(stream);
             else if (extension == ".xls")
-                edr = ExcelReaderFactory.CreateBinaryReader(stream);
+                edr = ExcelReaderFactory.CreateReader(stream);
 
             var conf = new ExcelDataSetConfiguration
             {
@@ -103,44 +104,64 @@ namespace Diplom.Pages
             edr.Close();
             return dtView;
         }
-
         private void btnSql_Click(object sender, RoutedEventArgs e)
         {
+            this.dtgView.SelectAllCells();
+            this.dtgView.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
+            ApplicationCommands.Copy.Execute(null, this.dtgView);
+            this.dtgView.UnselectAllCells();
+            var result = (string)Clipboard.GetData(DataFormats.CommaSeparatedValue);
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.FileName = "csv file";
+            dlg.DefaultExt = ".csv";
+            dlg.Filter = "CSV files (.csv)|*.csv";
+            Nullable<bool> _result = dlg.ShowDialog();
+
+            string filePath = "";
+            if (_result == true) filePath = dlg.FileName;
+
+            try
+            {
+                StreamWriter sw = new StreamWriter(filePath);
+                sw.Write(result);
+                sw.Close();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.Message.ToString());
+            }
             temp = LiveTimeLabel.Content.ToString();
             ds = LBTime.Content.ToString();
-            if (dtgView.ItemsSource != null)
-            {
+           // if (dtgView.ItemsSource != null)
+           // {
                 con.Open();
                 if (con != null && con.State == ConnectionState.Open)
                 {
-                    MessageBox.Show("Успешно подключено");
-                    //CheckTables(sender,e);
-                    string readString = "Create Database ["+ temp +"]";
-                    string Insert = "Use [" + temp + "] SELECT INFO [" + ds + "] FROM OPENROWSET('Microsoft.ACE.OLEDB.12.0','Excel 12.0; Database=[" + OpenD + "]', [Sheet1$]); ";
-                    SqlCommand insCommand = new SqlCommand(Insert, con);
+                    string readString = "Create Database [" + temp + "]";
                     SqlCommand readCommand = new SqlCommand(readString, con);
                     using (SqlDataReader dataRead = readCommand.ExecuteReader())
                     {
                         MessageBox.Show("База успешно создана");
                     }
+                    string insert = @"USE ["+ temp + "] CREATE TABLE [" + ds + "] (["+ dtgView.SelectedItems[0] +"] [NVARCHAR](max),[Name] [NVARCHAR](max) NULL, [SecondName] [NVARCHAR](max) NULL,[email] [NVARCHAR](max) NULL,[Company] [NVARCHAR](max) NULL,) BULK INSERT [" + ds + "] FROM 'C:\\Users\\olezh\\OneDrive\\Рабочий стол\\csv file.csv' WITH ( CODEPAGE = '1253',  FIELDTERMINATOR = ',', CHECK_CONSTRAINTS )";
+                    SqlCommand insCommand = new SqlCommand(insert, con);
                     using (SqlDataReader insdata = insCommand.ExecuteReader())
                     {
                         MessageBox.Show("Данные успешно добавлены");
                     }
-
                     con.Close();
                 }
-            else
-            {
-                MessageBox.Show("Неудалось подключиться к серверу");
-                return;
-            }
-            }
-            else
-            {
-                MessageBox.Show("Нету данных");
-                return;
-            }
+           // else
+           // {
+           //     MessageBox.Show("Неудалось подключиться к серверу");
+           //     return;
+           // }
+           // }
+           // else
+           // {
+           //     MessageBox.Show("Нету данных");
+           //     return;
+           // }
         }
         private void btnjSON_Click(object sender, RoutedEventArgs e)
         {
@@ -174,23 +195,6 @@ namespace Diplom.Pages
             else
             {
                 MessageBox.Show("Нету данных для создания файла");
-            }
-        }
-        private void CheckTables(object sender, RoutedEventArgs e)
-        {
-            DataRowView dataRow = (DataRowView)dtgView.SelectedItem;
-            List<DataGrid> tab = new List<DataGrid>();
-            int index = dtgView.CurrentCell.Column.DisplayIndex;
-            List<DataGrid> cellValue = new List<DataGrid>((int)dataRow.Row.ItemArray[index]);
-            for (int i = 0; i < dtgView.Columns.Count; i++)
-            {
-                for (int j = 0; j < cellValue.Count; j++)
-                {
-                    if (cellValue[j] == cellValue[j + 1])
-                    {
-                        tab = cellValue;
-                    }
-                }
             }
         }
     }
