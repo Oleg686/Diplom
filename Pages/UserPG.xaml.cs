@@ -105,6 +105,8 @@ namespace Diplom.Pages
         }
         private void btnSql_Click(object sender, RoutedEventArgs e)
         {
+            if (dtgView.ItemsSource != null)
+            {
                 this.dtgView.SelectAllCells();
                 this.dtgView.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
                 ApplicationCommands.Copy.Execute(null, this.dtgView);
@@ -131,9 +133,7 @@ namespace Diplom.Pages
                 }
                 temp = LiveTimeLabel.Content.ToString();
                 ds = LBTime.Content.ToString();
-            // if (dtgView.ItemsSource != null)
-            // {
-            con.Open();
+                con.Open();
                 if (con != null && con.State == ConnectionState.Open)
                 {
                     string readString = "Create Database [" + temp + "]";
@@ -150,17 +150,17 @@ namespace Diplom.Pages
                     }
                     con.Close();
                 }
-           // else
-           // {
-           //     MessageBox.Show("Неудалось подключиться к серверу");
-           //     return;
-           // }
-           // }
-           // else
-           // {
-           //     MessageBox.Show("Нету данных");
-           //     return;
-           // }
+                else
+                {
+                    MessageBox.Show("Неудалось подключиться к серверу");
+                    return;
+                }
+                }
+                else
+                {
+                    MessageBox.Show("Нету данных");
+                    return;
+                }
         }
         private void btnjSON_Click(object sender, RoutedEventArgs e)
         {
