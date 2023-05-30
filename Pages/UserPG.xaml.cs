@@ -33,6 +33,7 @@ using System.Runtime.Remoting.Contexts;
 using System.Data.OleDb;
 using System.Windows.Threading;
 using System.Web.Script.Serialization;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace Diplom.Pages
 {
@@ -41,12 +42,11 @@ namespace Diplom.Pages
     /// </summary>
     public partial class UserPG : Page
     {
+        // SqlConnection cn = new SqlConnection(@"Data Source=имя сервера;Initial Catalog=имя БД;Integrated Security=False;Persist Security Info=True;User ID=логин;Password=пароль");
         IExcelDataReader edr;
         string ds;
         string temp;
-        public SqlConnection con = new SqlConnection("Data Source=DESK_HP_MINI\\SQLEXPRESS;Integrated Security=true;");
-        OpenFileDialog OpenD = new OpenFileDialog();
-        int count_col;
+        SqlConnection con = new SqlConnection("Data Source=DESK_HP_MINI\\SQLEXPRESS;Integrated Security=true;");
         void timer_Tick(object sender, EventArgs e)
         {
             LiveTimeLabel.Content = DateTime.Now.ToString("D");
@@ -66,7 +66,6 @@ namespace Diplom.Pages
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Excel file (*.xlxs)|*.xlsx|All Files(*.*)|*.*";
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            OpenD = openFileDialog;
             if (openFileDialog.ShowDialog() == true)
             {
                 txbFile.Text = File.ReadAllText(openFileDialog.FileName);
@@ -106,35 +105,35 @@ namespace Diplom.Pages
         }
         private void btnSql_Click(object sender, RoutedEventArgs e)
         {
-            this.dtgView.SelectAllCells();
-            this.dtgView.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
-            ApplicationCommands.Copy.Execute(null, this.dtgView);
-            this.dtgView.UnselectAllCells();
-            var result = (string)Clipboard.GetData(DataFormats.CommaSeparatedValue);
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "csv file";
-            dlg.DefaultExt = ".csv";
-            dlg.Filter = "CSV files (.csv)|*.csv";
-            Nullable<bool> _result = dlg.ShowDialog();
+                this.dtgView.SelectAllCells();
+                this.dtgView.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
+                ApplicationCommands.Copy.Execute(null, this.dtgView);
+                this.dtgView.UnselectAllCells();
+                var result = (string)Clipboard.GetData(DataFormats.CommaSeparatedValue);
+                Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+                dlg.FileName = "csv file";
+                dlg.DefaultExt = ".csv";
+                dlg.Filter = "CSV files (.csv)|*.csv";
+                Nullable<bool> _result = dlg.ShowDialog();
 
-            string filePath = "";
-            if (_result == true) filePath = dlg.FileName;
+                string filePath = "";
+                if (_result == true) filePath = dlg.FileName;
 
-            try
-            {
-                StreamWriter sw = new StreamWriter(filePath);
-                sw.Write(result);
-                sw.Close();
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(ex.Message.ToString());
-            }
-            temp = LiveTimeLabel.Content.ToString();
-            ds = LBTime.Content.ToString();
-           // if (dtgView.ItemsSource != null)
-           // {
-                con.Open();
+                try
+                {
+                    StreamWriter sw = new StreamWriter(filePath);
+                    sw.Write(result);
+                    sw.Close();
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show(ex.Message.ToString());
+                }
+                temp = LiveTimeLabel.Content.ToString();
+                ds = LBTime.Content.ToString();
+            // if (dtgView.ItemsSource != null)
+            // {
+            con.Open();
                 if (con != null && con.State == ConnectionState.Open)
                 {
                     string readString = "Create Database [" + temp + "]";
@@ -143,7 +142,7 @@ namespace Diplom.Pages
                     {
                         MessageBox.Show("База успешно создана");
                     }
-                    string insert = @"USE ["+ temp + "] CREATE TABLE [" + ds + "] (["+ dtgView.SelectedItems[0] +"] [NVARCHAR](max),[Name] [NVARCHAR](max) NULL, [SecondName] [NVARCHAR](max) NULL,[email] [NVARCHAR](max) NULL,[Company] [NVARCHAR](max) NULL,) BULK INSERT [" + ds + "] FROM 'C:\\Users\\olezh\\OneDrive\\Рабочий стол\\csv file.csv' WITH ( CODEPAGE = '1253',  FIELDTERMINATOR = ',', CHECK_CONSTRAINTS )";
+                    string insert = @"USE ["+ temp + "] BEGIN CREATE TABLE [dbo].["+ ds + "] (        [ID] [INT] NOT NULL ,        [Name] [NVARCHAR](max) NULL,        [SecondName] [NVARCHAR](max) NULL,        [email] [NVARCHAR](max) NULL,        [Company] [NVARCHAR](max) NULL,    )    BULK INSERT ["+ ds + "]     FROM 'C:\\Users\\olezh\\OneDrive\\Рабочий стол\\csv file.csv'    WITH    (        CODEPAGE = '1253',        FIELDTERMINATOR = ',',        CHECK_CONSTRAINTS    ) END";
                     SqlCommand insCommand = new SqlCommand(insert, con);
                     using (SqlDataReader insdata = insCommand.ExecuteReader())
                     {
