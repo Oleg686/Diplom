@@ -34,6 +34,7 @@ using System.Data.OleDb;
 using System.Windows.Threading;
 using System.Web.Script.Serialization;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
 
 namespace Diplom.Pages
 {
@@ -136,17 +137,29 @@ namespace Diplom.Pages
                 con.Open();
                 if (con != null && con.State == ConnectionState.Open)
                 {
-                    string readString = "Create Database [" + temp + "]";
-                    SqlCommand readCommand = new SqlCommand(readString, con);
-                    using (SqlDataReader dataRead = readCommand.ExecuteReader())
+                    if (MessageBox.Show($"Существует ли база данных {temp}?", "Вопрос!!!", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     {
-                        MessageBox.Show("База успешно создана");
+                        string insert = @"USE [" + temp + "] BEGIN CREATE TABLE [dbo].[" + ds + "] (        [ID] [INT] NOT NULL ,        [Name] [NVARCHAR](max) NULL,        [SecondName] [NVARCHAR](max) NULL,        [email] [NVARCHAR](max) NULL,        [Company] [NVARCHAR](max) NULL,    )    BULK INSERT [" + ds + "]     FROM '" + dlg.FileName + "'    WITH    (        CODEPAGE = '1253',        FIELDTERMINATOR = ',',        CHECK_CONSTRAINTS    ) END";
+                        SqlCommand insCommand = new SqlCommand(insert, con);
+                        using (SqlDataReader insdata = insCommand.ExecuteReader())
+                        {
+                            MessageBox.Show("Данные успешно добавлены");
+                        }
                     }
-                    string insert = @"USE ["+ temp + "] BEGIN CREATE TABLE [dbo].["+ ds + "] (        [ID] [INT] NOT NULL ,        [Name] [NVARCHAR](max) NULL,        [SecondName] [NVARCHAR](max) NULL,        [email] [NVARCHAR](max) NULL,        [Company] [NVARCHAR](max) NULL,    )    BULK INSERT ["+ ds + "]     FROM 'C:\\Users\\olezh\\OneDrive\\Рабочий стол\\csv file.csv'    WITH    (        CODEPAGE = '1253',        FIELDTERMINATOR = ',',        CHECK_CONSTRAINTS    ) END";
-                    SqlCommand insCommand = new SqlCommand(insert, con);
-                    using (SqlDataReader insdata = insCommand.ExecuteReader())
+                    else
                     {
-                        MessageBox.Show("Данные успешно добавлены");
+                        string readString = "Create Database [" + temp + "]";
+                        SqlCommand readCommand = new SqlCommand(readString, con);
+                        using (SqlDataReader dataRead = readCommand.ExecuteReader())
+                        {
+                            MessageBox.Show("База успешно создана");
+                        }
+                        string insert = @"USE [" + temp + "] BEGIN CREATE TABLE [dbo].[" + ds + "] (        [ID] [INT] NOT NULL ,        [Name] [NVARCHAR](max) NULL,        [SecondName] [NVARCHAR](max) NULL,        [email] [NVARCHAR](max) NULL,        [Company] [NVARCHAR](max) NULL,    )    BULK INSERT [" + ds + "]     FROM '" + dlg.FileName + "'    WITH    (        CODEPAGE = '1253',        FIELDTERMINATOR = ',',        CHECK_CONSTRAINTS    ) END";
+                        SqlCommand insCommand = new SqlCommand(insert, con);
+                        using (SqlDataReader insdata = insCommand.ExecuteReader())
+                        {
+                            MessageBox.Show("Данные успешно добавлены");
+                        }
                     }
                     con.Close();
                 }

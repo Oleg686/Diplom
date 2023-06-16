@@ -15,8 +15,9 @@
             <RowDefinition Height="10*"/>
         </Grid.RowDefinitions>
         <Label Name="LiveTimeLabel" Content="%TIME%" HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="0" FontSize="20" FontWeight="Bold" Foreground="Red" />
-        <Label Name="LBTime"/>
+        <Label Name="LBTime" Visibility="Hidden"/>
         <Label Content="Возврат сбойных платежей" FontFamily="Comic Sans MS" FontSize="48" Height= "{Binding ElementName=wpTop,Path=ActualHeight}"/>
+        <Image Source="/Pages/Логотип.png" Grid.Row="0" HorizontalAlignment="Left"/>
         <WrapPanel Name="wpBot" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Center">
             <Button Name="btnFile" Content="Выбрать файл" FontSize="24" Click="btnFile_Click"/>
             <Button Name="btnSql" Content="Создать базу данных" FontSize="24" Click="btnSql_Click"/>
